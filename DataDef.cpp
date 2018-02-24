@@ -4,8 +4,8 @@
 Member::Member()
 {
 	this->id = UNINIT;
-	this->name = "";
-	this->description = "";
+	strcpy_s(this->name, "");
+	strcpy_s(this->description, "");
 }
 
 Member::~Member()

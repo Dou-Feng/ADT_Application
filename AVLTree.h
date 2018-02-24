@@ -21,8 +21,9 @@ public:
 	static Status DestroyAVL(AVLTree **T); //摧毁操作
 	static Member SearchAVL(AVLTree *T, int key); //搜索操作
 	static Status TraverseAVL(AVLTree *T, void (*f)(Member)); //遍历操作
+	Status TraverseAVL_n(AVLTree * T, Member * p, int & index, void(*f)(Member *p, int &index, Member *data));
+	Status TraverseAVL_n(AVLTree * T, int & index, void(*f)(int &index));
 	static Status DeleteAVL(AVLTree **T, int key, bool &shorter); //删除操作
-
 	static void r_Rotate(AVLTree **p); //右旋的指针更改
 	static void l_Rotate(AVLTree **p); //左旋的指针更改
 	static void leftBalance(AVLTree **T); //左平衡操作

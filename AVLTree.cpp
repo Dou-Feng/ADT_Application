@@ -221,13 +221,45 @@ Status AVLTree::InsertAVL(AVLTree **T, Member e, bool &taller) {
 Status AVLTree::TraverseAVL(AVLTree *T, void (*f)(Member)) {
 	if (T == nullptr)
 		return 0;
-	if (T != nullptr)
-		f(T->data);
+	
 	if (T->lchild != nullptr) {
 		TraverseAVL(T->lchild, f);
 	}
+	if (T != nullptr)
+		f(T->data);
 	if (T->rchild != nullptr) {
 		TraverseAVL(T->rchild, f);
+	}
+	return 1;
+}
+
+Status AVLTree::TraverseAVL_n(AVLTree * T, Member *p, int & index, void(*f)(Member *p, int &index, Member *data))
+{
+	if (T == nullptr)
+		return 0;
+	if (T->lchild != nullptr) {
+		TraverseAVL_n(T->lchild, p, index,  f);
+	}
+	if (T != nullptr)
+		f(p, index, &T->data);
+	if (T->rchild != nullptr) {
+		TraverseAVL_n(T->rchild, p, index, f);
+	}
+	return 1;
+
+}
+
+Status AVLTree::TraverseAVL_n(AVLTree * T, int & index, void(*f)(int &index))
+{
+	if (T == nullptr)
+		return 0;
+	if (T->lchild != nullptr) {
+		TraverseAVL_n(T->lchild, index, f);
+	}
+	if (T != nullptr)
+		f(index);
+	if (T->rchild != nullptr) {
+		TraverseAVL_n(T->rchild, index, f);
 	}
 	return 1;
 }

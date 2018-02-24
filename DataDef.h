@@ -10,8 +10,8 @@ public:
 public:
 	int id;
 	//还需要添加姓名、相关信息等
-	string name;
-	string description;
+	char name[20];
+	char description[150];
 private:
 
 };
