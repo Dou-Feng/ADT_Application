@@ -17,6 +17,7 @@ int main() {
 	FILE *f;
 	Member m;
 	char name[15];
+	int id_t;
 	int op = 0;
 	ADT *setB = new ADT();
 	ADT *setC;
@@ -45,7 +46,8 @@ int main() {
 			<< "5. set_intersection\t6. set_union\n"
 			<< "7. set_diffrence     \t8. set_size\n"
 			<< "9. set_member     \t10. set_subset\n"
-			<< "11. set_equal\t12. readDataFromFiles\t\n";
+			<< "11. set_equal\t12. readDataFromFiles\t\n"
+			<< "13. set_modify\t 14.set_find\n";
 		cout << "---------------------------------" << endl;
 		cout << "input your choice :" << endl;
 		cin >> op;
@@ -207,6 +209,47 @@ int main() {
 			}
 			getchar();
 			getchar();
+			break;
+		case 13:
+			if (set) {
+				cout << "input modify id :";
+				cin >> id_t;
+				cout << "input member's id :";
+				cin >> m.id;
+				cout << "input member's name :";
+				cin >> m.name;
+				if (set->modify(id_t, m)) {
+					cout << "modify finished!" << endl;
+				}
+				else {
+					cout << "modify failed!" << endl;
+				}
+			}
+			else {
+				cout << "Not Init";
+			}
+			getchar();
+			getchar();
+			break;
+		case 14:
+			if (set) {
+				cout << "input modify id :";
+				cin >> id_t;
+
+				if ((m = set->find(id_t)).id != UNINIT) {
+					cout << "Find result is :" << endl;
+					cout << "id :" << m.id << " ,name :" << m.name << endl;
+				}
+				else {
+					cout << "find failed!" << endl;
+				}
+			}
+			else {
+				cout << "Not Init";
+			}
+			getchar();
+			getchar();
+			break;
 		default:
 			break;
 		}

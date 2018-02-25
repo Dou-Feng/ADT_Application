@@ -19,6 +19,8 @@ int main() {
 	string des;
 	char name[100];
 	FILE *file;
+	char file_name[20];
+	int read_time = 0;
 	while (op >= 0)
 	{
 		system("cls");	printf("\n\n");
@@ -27,7 +29,7 @@ int main() {
 		cout << "1. Init AVL\t2. Destroy AVL\n"
 			<< "3. Search AVL\t4. Insert AVL\n"
 			<< "5. Delete AVL\t6. Traverse AVL" << endl
-			<< "7. input data from files" << endl;
+			<< "7. input data from files\t 8. save data into file" << endl;
 		cout << "---------------------------------" << endl;
 		cout << "input your choice :" << endl;
 		cin >> op;
@@ -94,15 +96,26 @@ int main() {
 			break;
 		case 7:
 			file = fopen("friends.txt", "r");
-			while (fscanf(file, "%d%s", &e.id, name) > 0)
-			{
-				e.name = name;
-				AVLTree::InsertAVL(&T, e, taller);
-			}
-			cout << "read finished!" << endl;
-			e.name = "";
+			if ((read_time = AVLTree::file_read(&T, file)) > 0)
+			cout << "read finished!" << ", time:" << read_time << endl;
+			strcpy(e.name, "");
 			fclose(file);
 			getchar(); getchar();
+			break;
+		case 8:
+			cout << "input file name: ";
+			cin >> file_name;
+			file = fopen(file_name, "w");
+			if (AVLTree::file_save(T, file)) {
+				cout << "save finished!" << endl;
+			}
+			else {
+				cout << "save failed!" << endl;
+			}
+			fclose(file);
+			getchar();
+			getchar();
+			break;
 		default:
 			break;
 		}

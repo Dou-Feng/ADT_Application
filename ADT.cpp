@@ -86,6 +86,15 @@ bool ADT::remove(Member m) {
 		return false;
 }
 
+/*修改元素的值*/
+bool ADT::modify(int key, Member m)
+{
+	if (AVLTree::modifyAVL(&elems, key, m))
+		return true;
+	else
+		return false;
+}
+
 /*元素删除的重载，删除多个元素，返回删除成功的个数*/
 int ADT::remove(Member *m, int size) {
 	bool shorter = false;
@@ -117,6 +126,11 @@ int ADT::remove(ADT *A) {
 	return delete_time;
 }
 
+Member ADT::find(int key)
+{
+	return AVLTree::SearchAVL(elems, key);
+}
+
 /*调用摧毁AVL的函数，摧毁ADT*/
 bool ADT::destroy()
 {
@@ -128,6 +142,26 @@ bool ADT::destroy()
 		this->~ADT(); //调用 析构函数
 		return false;
 	}
+}
+
+/*遍历函数*/
+bool ADT::traverse(void (*f)(Member))
+{
+	if (getSize() != 0) {
+		AVLTree::TraverseAVL(elems, f);
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool ADT::save(FILE * f)
+{
+	if (AVLTree::file_save(elems, f))
+		return true;
+	else
+		return false;
 }
 
 /*中间函数，用于添加元素到数组中*/

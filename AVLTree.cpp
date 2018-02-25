@@ -133,10 +133,11 @@ Status AVLTree::DestroyAVL(AVLTree **p) {
 	}
 }
 
-/*搜索结点，AVL的搜索非常迅速，时间总是与log成正比*/
-Member AVLTree::SearchAVL(AVLTree * T, int key)
+/*搜索结点，AVL的搜索非常迅速，时间总是与log成正比
+返回指向目标及结点的指针*/
+AVLTree *SearchAVL_Node(AVLTree *T, int key)
 {
-	Member aT;
+	AVLTree * aT = nullptr;
 	AVLTree *p = T;
 	while (p != nullptr)
 	{
@@ -147,9 +148,20 @@ Member AVLTree::SearchAVL(AVLTree * T, int key)
 			p = p->rchild;
 		}
 		else if (key == p->data.id) {
-			aT = p->data;
+			aT = p;
 			return aT;
 		}
+	}
+	return aT;
+}
+
+/*搜索结点，AVL的搜索非常迅速，时间总是与log成正比*/
+Member AVLTree::SearchAVL(AVLTree * T, int key)
+{
+	Member aT;
+	AVLTree *p;
+	if ((p = SearchAVL_Node(T, key))) {
+		aT = p->data;
 	}
 	return aT;
 }
@@ -360,6 +372,60 @@ Status AVLTree::DeleteAVL(AVLTree ** T, int key, bool & shorter)
 			}
 		}
 	}
+	return 1;
+}
+
+Status AVLTree::modifyAVL(AVLTree ** T, int key, Member m)
+{
+	bool shorter = false;
+	bool taller = false;
+	AVLTree *p = SearchAVL_Node(*T, key); //找到目标结点
+	if (p) { //能够找到
+		//修改
+		if (p->data.id == m.id) { //当id相等时
+			p->data = m;
+		}
+		else {
+			AVLTree::DeleteAVL(T, key, shorter); //先删除在添加
+			AVLTree::InsertAVL(T, m, taller); //再添加
+		}
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+
+#pragma warning(disable:4996)
+/*从文件中读取数据，读取失败返回0，读取成功返回读取条数*/
+Status AVLTree::file_read(AVLTree **T,FILE * f)
+{
+	if (!f) //打开失败，直接返回false
+		return 0;
+	Member e;
+	bool taller = false;
+	int time = 0;
+	while (fscanf(f, "%d%s%s", &e.id, e.name, e.description) > 0)
+	{
+		if (AVLTree::InsertAVL(T, e, taller))
+			time++;
+	}
+	return time;
+}
+
+
+/*储存数据到文件中，储存成功返回1，失败返回0*/
+Status AVLTree::file_save(AVLTree * T, FILE * f)
+{
+	if (!f)
+		return 0;
+	if (T->lchild)
+		file_save(T->lchild, f);
+	if (T) 
+		fprintf(f, "%d %s %s\n", T->data.id, T->data.name, T->data.description);
+	if (T->rchild)
+		file_save(T->rchild, f);
 	return 1;
 }
 

@@ -15,7 +15,6 @@ class AVLTree
 public:
 	AVLTree();
 	AVLTree(Member e);
-	//相当于初始化操作
 	static AVLTree *InitAVL(Member e); //初始化
 	static Status InsertAVL(AVLTree **T, Member e, bool &taller); //插入操作
 	static Status DestroyAVL(AVLTree **T); //摧毁操作
@@ -24,6 +23,10 @@ public:
 	Status TraverseAVL_n(AVLTree * T, Member * p, int & index, void(*f)(Member *p, int &index, Member *data));
 	Status TraverseAVL_n(AVLTree * T, int & index, void(*f)(int &index));
 	static Status DeleteAVL(AVLTree **T, int key, bool &shorter); //删除操作
+	static Status modifyAVL(AVLTree **T, int key, Member m); //修改操作
+	static Status file_read(AVLTree **T, FILE *f); //从文件中读取操作
+	static Status file_save(AVLTree *T, FILE *f); //储存到文件操作
+
 	static void r_Rotate(AVLTree **p); //右旋的指针更改
 	static void l_Rotate(AVLTree **p); //左旋的指针更改
 	static void leftBalance(AVLTree **T); //左平衡操作
