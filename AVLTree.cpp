@@ -1,14 +1,25 @@
 #include "AVLTree.h"
 #include <stack>
+#include <queue>
 
-
+/*创建时的初始化函数*/
 AVLTree::AVLTree()
 {
 	this->bf = 0;
 	this->lchild = nullptr;
 	this->rchild = nullptr;
 }
-
+/*创建时的初始化函数*/
+AVLTree::AVLTree(int id) 
+{
+	this->bf = 0;
+	this->lchild = nullptr;
+	this->rchild = nullptr;
+	this->data.id = id;
+	strcpy_s(this->data.name, "");
+	strcpy_s(this->data.description, "");
+}
+/*创建时的初始化函数*/
 AVLTree::AVLTree(Member e) {
 	this->bf = 0;
 	this->lchild = nullptr;
@@ -114,6 +125,42 @@ void AVLTree::rightBalance(AVLTree **T) {
 	} //end switch(rc->bf)
 }
 
+/*层序遍历函数，能够按层遍历树，遍历成功返回1，遍历失败返回0*/
+Status AVLTree::levelOrderTraverse(AVLTree * T, void(*visit)(Member))
+{
+	int time = 0;  //记录次数
+	long number = 1;
+	if (T) {
+		//用于存储结点指针的队列
+		queue<AVLTree *> q;
+		//用于遍历的Node指针
+		AVLTree *p;
+
+		q.push(T);
+		while (!q.empty()) {
+			p = q.front();
+			q.pop();
+			visit(p->data);
+			time++;
+			if (time == number) {
+				time -= number;
+				printf("\n");
+				number *= 2;
+			}
+			if (p->lchild != nullptr) {
+				q.push(p->lchild);
+			}
+			if (p->rchild != nullptr) {
+				q.push(p->rchild);
+			}
+		}
+		return 1;
+	}
+	else {
+		return -1;
+	}
+}
+
 /*递归调用摧毁函数，直到摧毁整棵树*/
 Status AVLTree::DestroyAVL(AVLTree **p) {
 	if (*p == nullptr)
@@ -137,8 +184,7 @@ Status AVLTree::DestroyAVL(AVLTree **p) {
 返回指向目标及结点的指针*/
 AVLTree *SearchAVL_Node(AVLTree *T, int key)
 {
-	AVLTree * aT = nullptr;
-	AVLTree *p = T;
+	AVLTree *p = T; //遍历指针
 	while (p != nullptr)
 	{
 		if (key < p->data.id) {
@@ -148,11 +194,10 @@ AVLTree *SearchAVL_Node(AVLTree *T, int key)
 			p = p->rchild;
 		}
 		else if (key == p->data.id) {
-			aT = p;
-			return aT;
+			return p;
 		}
 	}
-	return aT;
+	return nullptr;
 }
 
 /*搜索结点，AVL的搜索非常迅速，时间总是与log成正比*/
@@ -166,11 +211,6 @@ Member AVLTree::SearchAVL(AVLTree * T, int key)
 	return aT;
 }
 
-/*初始化操作，相当于重载了构建函数*/
-AVLTree *AVLTree::InitAVL(Member e) {
-	return new AVLTree(e);
-}
-
 /*若在平衡二叉树T中不存在和e有相同关键字的结点，则插入一个数据元素
 为e的新结点，并返回1，否则返回0,。若因插入而使二叉排序树失去平衡，则作
 平衡处理。布尔值taller反应T长高与否*/ 
@@ -182,7 +222,7 @@ Status AVLTree::InsertAVL(AVLTree **T, Member e, bool &taller) {
 		taller = true;
 	}
 	else {
-		if (e.id == (*T)->data.id) {
+		if (e.id == (*T)->data.id || e.id == UNINIT) {
 			taller = false;
 			return 0;
 		} 
@@ -245,6 +285,7 @@ Status AVLTree::TraverseAVL(AVLTree *T, void (*f)(Member)) {
 	return 1;
 }
 
+//用于后面ADT中得到所有元素，遍历每一个树结点，并且每次都执行f
 Status AVLTree::TraverseAVL_n(AVLTree * T, Member *p, int & index, void(*f)(Member *p, int &index, Member *data))
 {
 	if (T == nullptr)
@@ -261,6 +302,7 @@ Status AVLTree::TraverseAVL_n(AVLTree * T, Member *p, int & index, void(*f)(Memb
 
 }
 
+//用于后面ADT的元素个数统计，遍历每一个树结点，并且每次都执行f
 Status AVLTree::TraverseAVL_n(AVLTree * T, int & index, void(*f)(int &index))
 {
 	if (T == nullptr)
@@ -314,6 +356,7 @@ Status AVLTree::DeleteAVL(AVLTree ** T, int key, bool & shorter)
 				case EH:
 					(*T)->bf = RH;
 					shorter = false;
+					break;
 				case RH:
 					if ((*T)->rchild->bf == EH) {
 						shorter = false;
@@ -339,12 +382,13 @@ Status AVLTree::DeleteAVL(AVLTree ** T, int key, bool & shorter)
 			case EH:
 				(*T)->bf = RH;
 				shorter = false;
+				break;
 			case RH:
 				if ((*T)->rchild->bf == EH) {
 					shorter = false;
 				}
 				else
-					shorter = true;
+					shorter = true;		
 				rightBalance(T);
 				break;
 			}
@@ -357,14 +401,16 @@ Status AVLTree::DeleteAVL(AVLTree ** T, int key, bool & shorter)
 		if (shorter) {
 			switch ((*T)->bf) {
 			case LH:
-				leftBalance(T);
 				if ((*T)->lchild->bf == EH) {
 					shorter = false;
 				} else
 					shorter = true;
+				leftBalance(T);
+				break;
 			case EH:
 				(*T)->bf = LH;
 				shorter = false;
+				break;
 			case RH:
 				(*T)->bf = EH;
 				shorter = true;
@@ -375,6 +421,7 @@ Status AVLTree::DeleteAVL(AVLTree ** T, int key, bool & shorter)
 	return 1;
 }
 
+/*修改指定id的数据内容，修改成功返回1，没有成功返回0*/
 Status AVLTree::modifyAVL(AVLTree ** T, int key, Member m)
 {
 	bool shorter = false;
@@ -396,36 +443,58 @@ Status AVLTree::modifyAVL(AVLTree ** T, int key, Member m)
 	}
 }
 
-
 #pragma warning(disable:4996)
+/*字符串切割，把切割好的字符串数组存放在coll中，doc为原字符串
+seg为切割标记*/
+void AVLTree::split(char coll[][150], char * doc, const char * seg)
+{
+	int index = 0;
+	char *str_s = strtok(doc, seg);
+	while (str_s != NULL) {
+		strcpy(coll[index++], str_s);
+		str_s = strtok(NULL, seg);
+	}
+}
+
+
 /*从文件中读取数据，读取失败返回0，读取成功返回读取条数*/
 Status AVLTree::file_read(AVLTree **T,FILE * f)
 {
 	if (!f) //打开失败，直接返回false
 		return 0;
 	Member e;
+	char str_gets[200];
 	bool taller = false;
 	int time = 0;
-	while (fscanf(f, "%d%s%s", &e.id, e.name, e.description) > 0)
+	while (fscanf(f, "%d", &e.id) &&fgets(str_gets, 200, f) != NULL)
 	{
+		char str_coll[3][150];
+		AVLTree::split(str_coll, str_gets, "|*"); //以|*的分割符切割
+		strcpy(e.name, str_coll[0]);
+		char str_temp[150];
+		strcpy(str_temp, str_coll[1]);
+		AVLTree::split(str_coll, str_temp, "\n");  //去掉尾部的\n
+		strcpy(e.description, str_coll[0]);
 		if (AVLTree::InsertAVL(T, e, taller))
 			time++;
 	}
 	return time;
 }
 
-
 /*储存数据到文件中，储存成功返回1，失败返回0*/
 Status AVLTree::file_save(AVLTree * T, FILE * f)
 {
-	if (!f)
+	if (!f || !T)
 		return 0;
-	if (T->lchild)
+	if (T->lchild != nullptr)
 		file_save(T->lchild, f);
-	if (T) 
-		fprintf(f, "%d %s %s\n", T->data.id, T->data.name, T->data.description);
-	if (T->rchild)
+	if (T) {
+		fprintf(f, "%d|*%s|*%s\n", T->data.id, T->data.name, T->data.description);
+	}
+	if (T->rchild != nullptr)
 		file_save(T->rchild, f);
 	return 1;
 }
+
+
 

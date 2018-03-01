@@ -1,5 +1,6 @@
 #pragma once
 #include "DataDef.h"
+#include <string.h>
 
 #define LH +1
 #define EH 0
@@ -14,8 +15,8 @@ class AVLTree
 {
 public:
 	AVLTree();
+	AVLTree(int id);
 	AVLTree(Member e);
-	static AVLTree *InitAVL(Member e); //初始化
 	static Status InsertAVL(AVLTree **T, Member e, bool &taller); //插入操作
 	static Status DestroyAVL(AVLTree **T); //摧毁操作
 	static Member SearchAVL(AVLTree *T, int key); //搜索操作
@@ -31,6 +32,8 @@ public:
 	static void l_Rotate(AVLTree **p); //左旋的指针更改
 	static void leftBalance(AVLTree **T); //左平衡操作
 	static void rightBalance(AVLTree **T); //右平衡操作
+	static Status levelOrderTraverse(AVLTree *T, void(*visit)(Member)); //遍历操作
+	static void split(char coll[][150], char * doc, const char * seg);  //字符串的分割函数
 
 public:
 	Member data;  //数据

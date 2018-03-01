@@ -26,6 +26,7 @@ public:
 	static ADT *set_union(Member *coll, ADT *a, ADT *b); //求并集
 	static bool set_subset(ADT *a, ADT *b); //子集判断
 	static bool set_equal(ADT *a, ADT *b); //相等判断
+	static Member set_member(ADT *a, Member m); //判断是否属于集合a
 
 public:
 	AVLTree *elems; //数据项

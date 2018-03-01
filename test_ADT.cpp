@@ -3,7 +3,9 @@
 #include <iostream>
 #include "ADT.h"
 
+
 #define COLLSIZE 600
+#define MAXSIZE 200
 
 using namespace std;
 #pragma warning(disable:4996)
@@ -13,50 +15,46 @@ void visit(Member e) {
 }
 
 int main() {
-	ADT *set = nullptr;
+	ADT *adt[MAXSIZE];
+	int cindex = -1, size = 0;
 	FILE *f;
 	Member m;
 	char name[15];
+	char url[40];
 	int id_t;
 	int op = 0;
-	ADT *setB = new ADT();
-	ADT *setC;
 	Member coll[COLLSIZE];
 	memset(coll, 0, sizeof(Member) * COLLSIZE);
-	f = fopen("friends.txt", "r");
-
-	for (int i = 0; i < 484; i++)
-	{
-		fscanf(f, "%d%s", &m.id, name);
-		if (1) {
-			strcpy(m.name, name);
-			setB->insert(m);
-		}
-	}
-	strcpy(m.name, name);
-	fclose(f);
-
+	ADT *set = nullptr;
+	ADT *set_find = nullptr;
+	int i = -1;
 	while (op >= 0)
 	{
 		system("cls");	printf("\n\n");
 		cout << "\tTest for the ADT" << endl;
 		cout << "---------------------------------" << endl;
-		cout << "1. set_init  \t2. set_destroy\n"
-			<< "3. set_insert  \t4. set_remove\n"
-			<< "5. set_intersection\t6. set_union\n"
-			<< "7. set_diffrence     \t8. set_size\n"
-			<< "9. set_member     \t10. set_subset\n"
-			<< "11. set_equal\t12. readDataFromFiles\t\n"
-			<< "13. set_modify\t 14.set_find\n";
+		cout << "1. set_init		2. set_destroy\n"
+			<< "3. set_insert		4. set_remove\n"
+			<< "5. set_inter		6. set_union\n"
+			<< "7. set_diff		8. set_size\n"
+			<< "9. set_traverse		10. set_subset\n"
+			<< "11. set_equal		12. readDataFromFiles\t\n"
+			<< "13. set_modify		14. set_Member\n"
+			<< "15. switch ADT		16. saveDataIntoFiles\n"
+			<< "17. set_insert_set	18. set_remove_set\n";
 		cout << "---------------------------------" << endl;
 		cout << "input your choice :" << endl;
 		cin >> op;
 		switch (op)
 		{
 		case 1:
-			if (!set) {
-				set = new ADT();
-				cout << "Init finished!" << endl;
+			if (size < MAXSIZE) {
+				strcpy(name, "A");
+				adt[size] = new ADT();
+				cindex = size++;
+				set = adt[cindex];
+				cout << "init finished" << endl;
+				cout << "Current index:" << cindex << endl;
 			}
 			else {
 				cout << "Init failed!" << endl;
@@ -65,23 +63,38 @@ int main() {
 			getchar();
 			break;
 		case 2:
-			if (set) {
+			if (cindex >= 0) {
 				set->destroy();
-				cout << "destroy finished!" << endl;
-				set = nullptr;
+				size--;
+				if (size == 0)
+					cindex = -1;
+				else {
+					for (int i = cindex; i < size; i++) {
+						adt[i] = adt[i + 1];
+					}
+					if (cindex == size)
+						set = adt[--cindex];
+					else if (cindex > size)
+						set = adt[0];
+					else
+						set = adt[cindex];
+				}
+				cout << "finished!" << endl;
 			}
 			else {
-				cout << "Not Init";
+				cout << "failed!" << endl;
 			}
 			getchar();
 			getchar();
 			break;
 		case 3:
-			if (set) {
+			if (cindex >= 0) {
 				cout << "input id :";
 				cin >> m.id;
 				cout << "input name :";
 				cin >> m.name;
+				cout << "input description :";
+				cin >> m.description;
 				set->insert(m);
 				cout << "insert finished!" << endl;
 			}
@@ -92,11 +105,13 @@ int main() {
 			getchar();
 			break;
 		case 4:
-			if (set) {
+			if (cindex >= 0) {
 				cout << "input id :";
 				cin >> m.id;
-				set->remove(m);
-				cout << "remove finished!" << endl;
+				if (set->remove(m))
+					cout << "remove finished!" << endl;
+				else 
+					cout << "remove failed!" << endl;
 			}
 			else {
 				cout << "Not Init";
@@ -105,11 +120,17 @@ int main() {
 			getchar();
 			break;
 		case 5:
-			if (set) {
-				setC = ADT::set_intersection(coll, set, setB);
-				AVLTree::TraverseAVL(setC->elems, visit);
+			if (cindex >= 0) {
+				cout << "input index of the set:(<" << size << ")";
+				cin >> i;
+				if (i < 0 || i > size) {
+					getchar();
+					getchar();
+					break;
+				}
+				set_find = ADT::set_intersection(coll, set, adt[i]);
+				AVLTree::TraverseAVL(set_find->elems, visit);
 				cout << endl;
-				visit(coll[0]);
 			}
 			else {
 				cout << "Not Init";
@@ -118,11 +139,17 @@ int main() {
 			getchar();
 			break;
 		case 6:
-			if (set) {
-				setC = ADT::set_union(coll, set, setB);
-				AVLTree::TraverseAVL(setC->elems, visit);
+			if (cindex >= 0) {
+				cout << "input index of the set:(<" << size << ")";
+				cin >> i;
+				if (i < 0 || i > size) {
+					getchar();
+					getchar();
+					break;
+				}
+				set_find = ADT::set_union(coll, set, adt[i]);
+				AVLTree::TraverseAVL(set_find->elems, visit);
 				cout << endl;
-				visit(coll[0]);
 			}
 			else {
 				cout << "Not Init";
@@ -131,11 +158,17 @@ int main() {
 			getchar();
 			break;
 		case 7:
-			if (set) {
-				setC = ADT::set_different(coll, set, setB);
-				AVLTree::TraverseAVL(setC->elems, visit);
+			if (cindex >= 0) {
+				cout << "input index of the set:(<" << size << ")";
+				cin >> i;
+				if (i < 0 || i > size) {
+					getchar();
+					getchar();
+					break;
+				}
+				set_find = ADT::set_different(coll, set, adt[i]);
+				AVLTree::TraverseAVL(set_find->elems, visit);
 				cout << endl;
-				visit(coll[0]);
 			}
 			else {
 				cout << "Not Init";
@@ -144,7 +177,7 @@ int main() {
 			getchar();
 			break;
 		case 8:
-			if (set) {
+			if (cindex >= 0) {
 				cout << "Set size :" << set->getSize() << endl;
 			}
 			else {
@@ -154,9 +187,10 @@ int main() {
 			getchar();
 			break;
 		case 9:
-			if (set) {
+			if (cindex >= 0) {
 				cout << "The list of members:" << endl;
 				AVLTree::TraverseAVL(set->elems, visit);
+				cout << "end" << endl;
 			}
 			else {
 				cout << "Not Init";
@@ -165,9 +199,20 @@ int main() {
 			getchar();
 			break;
 		case 10:
-			if (set) {
-				if (set->set_subset(setB, set)) {
-					cout << "It is Subset" << endl;
+			if (cindex >= 0) {
+				cout << "input index of the set:(<" << size << ")";
+				cin >> i;
+				if (i < 0 || i > size) {
+					getchar();
+					getchar();
+					break;
+				}
+				if (set->set_subset(adt[i], set)) {
+					cout << "The list of members of index" << i << endl;
+					AVLTree::TraverseAVL(adt[i]->elems, visit);
+					cout << "The list of members of current index" << endl;
+					AVLTree::TraverseAVL(set->elems, visit);
+					cout << "It is Subset of current set" << endl;
 				}
 				else {
 					cout << "Not Subset!" << endl;
@@ -180,8 +225,15 @@ int main() {
 			getchar();
 			break;
 		case 11:
-			if (set) {
-				if (ADT::set_equal(set, setB))
+			if (cindex >= 0) {
+				cout << "input index of the set:(<" << size << ")";
+				cin >> i;
+				if (i < 0 || i > size) {
+					getchar();
+					getchar();
+					break;
+				}
+				if (ADT::set_equal(set, adt[i]))
 					cout << "set equal!" << endl;
 				else
 					cout << "set Not equal!" << endl;
@@ -193,15 +245,20 @@ int main() {
 			getchar();
 			break;
 		case 12:
-			if (set) {
-				f = fopen("friends.txt", "r");
-				while (fscanf(f, "%d%s", &m.id, name) > 0)
-				{
-					strcpy(m.name, name);
-					set->insert(m);
+			if (cindex >= 0) {
+				cout << "input file name:";
+				cin >> url;
+				f = fopen(url, "r");
+				if (!f) {
+					cout << "open file failed!" << endl;
+					getchar();
+					getchar();
+					break;
 				}
-				cout << "read finished!" << endl;
-				strcpy(m.name, "");
+				if (set->read(f))
+					cout << "Read finished!" << endl;
+				else
+					cout << "Read failed!" << endl;
 				fclose(f);
 			}
 			else {
@@ -211,7 +268,7 @@ int main() {
 			getchar();
 			break;
 		case 13:
-			if (set) {
+			if (cindex >= 0) {
 				cout << "input modify id :";
 				cin >> id_t;
 				cout << "input member's id :";
@@ -232,7 +289,7 @@ int main() {
 			getchar();
 			break;
 		case 14:
-			if (set) {
+			if (cindex >= 0) {
 				cout << "input modify id :";
 				cin >> id_t;
 
@@ -243,6 +300,92 @@ int main() {
 				else {
 					cout << "find failed!" << endl;
 				}
+			}
+			else {
+				cout << "Not Init";
+			}
+			getchar();
+			getchar();
+			break;
+		case 15:
+			if (cindex >= 0) {
+				cout << "input the index :(<" << size << ")" << endl;
+				cin >> i;
+				if (i > size) {
+					cout << "fail!" << endl;
+					getchar();
+					getchar();
+					break;
+				}
+				cindex = i;
+				set = adt[cindex];
+				cout << "Current index is:" << cindex << endl;
+			}
+			else {
+				cout << "failed!" << endl;
+			}
+			getchar();
+			getchar();
+			break;
+		case 16:
+			if (cindex >= 0) {
+				cout << "input file name:";
+				cin >> url;
+				f = fopen(url, "w");
+				if (!f) {
+					cout << "open file failed!" << endl;
+					getchar();
+					getchar();
+					break;
+				}
+				if (set->save(f))
+					cout << "Read finished!" << endl;
+				else
+					cout << "Read failed!" << endl;
+			}
+			else {
+				cout << "Not Init";
+			}
+			getchar();
+			getchar();
+			break;
+		case 17:
+			if (cindex >= 0) {
+				cout << "input the index :(<" << size << ")" << endl;
+				cin >> i;
+				if (i > size) {
+					cout << "fail!" << endl;
+					getchar();
+					getchar();
+					break;
+				}
+				if (id_t = set->insert(adt[i]))
+					cout << "insert sucess!Insert " << id_t << " members" << endl;
+				else
+					cout << "insert failed!";
+				
+			}
+			else {
+				cout << "Not Init";
+			}
+			getchar();
+			getchar();
+			break;
+		case 18:
+			if (cindex >= 0) {
+				cout << "input the index :(<" << size << ")" << endl;
+				cin >> i;
+				if (i > size) {
+					cout << "fail!" << endl;
+					getchar();
+					getchar();
+					break;
+				}
+				if (id_t = set->remove(adt[i]))
+					cout << "remove sucess!remove " << id_t << " members" << endl;
+				else
+					cout << "remove failed!";
+
 			}
 			else {
 				cout << "Not Init";

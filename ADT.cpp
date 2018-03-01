@@ -1,15 +1,14 @@
 #include "ADT.h"
 
-
+//初始化
 ADT::ADT()
 {
 	bool taller = false;
 	elems = new AVLTree();
 	elems->DeleteAVL(&elems, UNINIT, taller);
 }
+
 /*用于记录Member的数据，getallElem的中间函数*/
-
-
 void record(Member *p, int &index, Member *data) {
 	p[index++] = *data;
 }
@@ -116,16 +115,18 @@ int ADT::remove(ADT *A) {
 	int delete_time = 0;
 	int A_size = A->getSize();
 	Member *ms = (Member *)malloc(sizeof(Member) * A_size);
+	memset(ms, 0, sizeof(Member *) * A_size);
 	A->getAllElem(ms);
 	bool  shorter = false;
 	for (int i = 0; i < A_size; ++i) {
-		if (AVLTree::DeleteAVL(&elems, ms[i].id, shorter))
+		if (this->remove(ms[i]))
 			delete_time++;
 	}
 	free(ms);
 	return delete_time;
 }
 
+/*查找函数*/
 Member ADT::find(int key)
 {
 	return AVLTree::SearchAVL(elems, key);
@@ -156,11 +157,21 @@ bool ADT::traverse(void (*f)(Member))
 	}
 }
 
+/*文件保存*/
 bool ADT::save(FILE * f)
 {
 	if (AVLTree::file_save(elems, f))
 		return true;
 	else
+		return false;
+}
+
+/*文件读取*/
+bool ADT::read(FILE * f)
+{
+	if (AVLTree::file_read(&elems, f))
+		return true;
+	else 
 		return false;
 }
 
@@ -214,43 +225,31 @@ ADT *ADT::set_intersection(Member *coll, ADT * a, ADT * b)
 	return interSet;
 }
 
-/*集合差集，填充coll，并且返回差集*/
+/*集合差集（a - b)，填充coll，并且返回a - b 之后的集合指针*/
 ADT * ADT::set_different(Member * coll, ADT * a, ADT * b)
 {
 	int index = 0; //用于记录coll下标
 	bool taller = false; //用于插入元素
 	ADT *diffSet = new ADT(); //用于返回值
 	int a_size = a->getSize(); //得到a集合大小
-	int b_size = b->getSize(); //得到b集合大小
 	Member *a_ms = (Member *)malloc(sizeof(Member) * a_size);
 	memset(a_ms, 0, sizeof(Member) * a_size);
-	Member *b_ms = (Member *)malloc(sizeof(Member) * b_size);
-	memset(b_ms, 0, sizeof(Member) * b_size);
+
 	a->getAllElem(a_ms);//得到a集合所有元素，且从小到大排列
-	b->getAllElem(b_ms);//得到b集合所有元素，且从小到大排列
-	
-	if (a_size < b_size) { //用a作库，用b中的各个元素查找
-		for (int i = 0; i < b_size; i++) {
-			Member result_s = AVLTree::SearchAVL(a->elems, b_ms[i].id);
-			if (result_s.id == UNINIT)
-				fullColl(coll, index++, b_ms[i]);
-		}
-	}
-	else {
-		for (int i = 0; i < a_size; i++) { //用b作库，用a中的各个元素查找
-			Member result_s = AVLTree::SearchAVL(b->elems, a_ms[i].id);
-			if (result_s.id == UNINIT)
-				fullColl(coll, index++, a_ms[i]);
-		}
+
+	for (int i = 0; i < a_size; i++) { //用b作库，用a中的各个元素查找
+		Member result_s = AVLTree::SearchAVL(b->elems, a_ms[i].id);
+		if (result_s.id == UNINIT)
+			fullColl(coll, index++, a_ms[i]);
 	}
 	for (int i = 0; i < index; i++) {
 		AVLTree::InsertAVL(&diffSet->elems, coll[i], taller);
 	}
 	free(a_ms);
-	free(b_ms);
 	return diffSet;
 }
 
+/*求a,b的并集，返回并集指针，并且填充coll*/
 ADT * ADT::set_union(Member * coll, ADT * a, ADT * b)
 {
 	int index = 0; //用于记录coll下标
@@ -264,7 +263,6 @@ ADT * ADT::set_union(Member * coll, ADT * a, ADT * b)
 	memset(b_ms, 0, sizeof(Member) * b_size);
 	a->getAllElem(a_ms);//得到a集合所有元素，且从小到大排列
 	b->getAllElem(b_ms);//得到b集合所有元素，且从小到大排列
-
 	for (int i = 0; i < a_size; i++) { //首先把a中所有元素加入到coll中
 		fullColl(coll, index++, a_ms[i]);
 	}
@@ -272,7 +270,7 @@ ADT * ADT::set_union(Member * coll, ADT * a, ADT * b)
 	for (int i = 0; i < b_size; i++) { //然后把a中没有，b中有的元素加入到coll中
 		Member result_s = AVLTree::SearchAVL(a->elems, b_ms[i].id);
 		if (result_s.id == UNINIT)
-			fullColl(coll, index++, result_s);
+			fullColl(coll, index++, b_ms[i]);
 	}
 	
 
@@ -304,6 +302,7 @@ bool ADT::set_subset(ADT * a, ADT * b)
 	return true;
 }
 
+/*集合相等，相等返回true，不相等返回false*/
 bool ADT::set_equal(ADT * a, ADT * b)
 {
 	int a_size = a->getSize(); //得到a集合大小
@@ -321,6 +320,12 @@ bool ADT::set_equal(ADT * a, ADT * b)
 	}
 	free(a_ms);
 	return true;
+}
+
+//判断是否在集合中，并且返回查找到的数据，如果没有找到返回数据的id为UNINIT
+Member ADT::set_member(ADT * a, Member m)
+{
+	return AVLTree::SearchAVL(a->elems, m.id);
 }
 
  
